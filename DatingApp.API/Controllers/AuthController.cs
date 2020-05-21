@@ -24,8 +24,8 @@ namespace DatingApp.API.Controllers
         private readonly IConfiguration _config;
         public AuthController(IAuthRepository repo, IConfiguration config)
         {
-            _config = config;
-            _repo = repo;
+           this._config = config;
+            this._repo = repo;
         }
 
         [HttpPost("register")]
