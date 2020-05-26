@@ -20,6 +20,8 @@ using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using DatingApp.API.Helpers;
+using AutoMapper;
+using Newtonsoft.Json;
 
 namespace DatingApp.API
 {
@@ -36,9 +38,13 @@ namespace DatingApp.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataContext>( x => x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            // services.AddMvc().AddJsonOptions(x => x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
             services.AddControllers().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddCors();
+            services.AddTransient<Seed>();
+            services.AddAutoMapper();
             services.AddScoped<IAuthRepository , AuthRepository>();
+            services.AddScoped<IDatingRepository , DatingRepository>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -53,7 +59,7 @@ namespace DatingApp.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, Seed seeder)
         {
             if (env.IsDevelopment())
             {
@@ -75,9 +81,11 @@ namespace DatingApp.API
                 });
             }
 
+
             app.UseCors(
                 x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
             );
+
 
             app.UseAuthentication();
 
@@ -87,10 +95,13 @@ namespace DatingApp.API
 
             app.UseAuthorization();
 
+            // seeder.SeedUsers();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
         }
     }
 }
